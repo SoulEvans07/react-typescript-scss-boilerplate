@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import React, { lazy, Suspense } from 'react';
 
 interface Opts {
@@ -5,14 +6,14 @@ interface Opts {
 }
 type Unpromisify<T> = T extends Promise<infer P> ? P : never;
 
-export const lazyLoad = <
+export function lazyLoad<
   T extends Promise<any>,
   U extends React.ComponentType<any>
 >(
   importFunc: () => T,
   selectorFunc?: (s: Unpromisify<T>) => U,
   opts: Opts = { fallback: null },
-) => {
+): React.FC {
   let lazyFactory: () => Promise<{ default: U }> = importFunc;
 
   if (selectorFunc) {
@@ -22,9 +23,11 @@ export const lazyLoad = <
 
   const LazyComponent = lazy(lazyFactory);
 
+
+  // eslint-disable-next-line react/display-name
   return (props: React.ComponentProps<U>): JSX.Element => (
     <Suspense fallback={opts.fallback!}>
       <LazyComponent {...props} />
     </Suspense>
   );
-};
+}
